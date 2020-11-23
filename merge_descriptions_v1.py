@@ -33,15 +33,20 @@ class InvalidFileFormat(Exception):
             raise InvalidFileType
 
         
-        if 'Description 1' in df.columns and 'Description 2' in df.columns and 'Description 3' in df.columns and 'Description 4' in df.columns:
+        if 'Description 1' in df.columns and 'Description 2' in df.columns and 'Description 3' in df.columns and 'Description 4' in df.columns and 'Tariff Code' in df.columns:
+            # # combine descrip1 and decrip2 into col 'Product Name'
+            # df['Product Name'] = df['Description 1'].str.cat(df['Description 2'],sep=", ")
+
+
             # combine descrip1 and decrip2 into col 'Product Name'
-            df['Product Name'] = df['Description 1'].str.cat(df['Description 2'],sep=", ")
+            df['Product Description'] = df['Description 1'].str.cat(df['Description 2'],sep=" ").str.cat(df['Description 3'],sep=" ").str.cat(df['Description 4'],sep=" ").str.cat(df['Tariff Code'],sep="")
+
 
             # combine descrip3 and decrip4 into col 'Product Description'
-            df['Product Description'] = df['Description 3'].str.cat(df['Description 4'],sep=", ")
+            # df['Product Description'] = df['Description 3'].str.cat(df['Description 4'],sep=", ")
 
-            # remove columns descrip 1,2,3,4
-            df = df.drop(['Description 1', 'Description 2', 'Description 3', 'Description 4'], axis=1)
+            # remove columns tariff code, descrip 1,2,3,4
+            df = df.drop(['Tariff Code', 'Description 1', 'Description 2', 'Description 3', 'Description 4'], axis=1)
             
 
 
