@@ -17,7 +17,7 @@ class InvalidFileFormat(Exception):
         inFile = inFile.replace('"', "")
 
         outFile = inFile[:-4]
-        outFile += ".out.csv"
+        outFile += ".out.xls"
 
 
         df = ''
@@ -39,7 +39,7 @@ class InvalidFileFormat(Exception):
 
 
             # combine descrip1 and decrip2 into col 'Product Name'
-            df['Product Description'] = df['Description 1'].str.cat(df['Description 2'],sep=" ").str.cat(df['Description 3'],sep=" ").str.cat(df['Description 4'],sep=" ").str.cat(df['Tariff Code'],sep="")
+            df['Product Description'] = df['Description 1'].str.cat(df['Description 2'],sep=" ").str.cat(df['Description 3'],sep=" ").str.cat(df['Description 4'],sep=" ").str.cat(df['Tariff Code'],sep=" ")
 
 
             # combine descrip3 and decrip4 into col 'Product Description'
@@ -50,7 +50,9 @@ class InvalidFileFormat(Exception):
             
 
 
-            df.to_csv(outFile, index=False)
+            # df.to_csv(outFile, index=False)
+
+            df.to_excel(outFile, index=False)  
 
             
 
