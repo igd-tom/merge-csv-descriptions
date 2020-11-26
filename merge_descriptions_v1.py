@@ -1,88 +1,120 @@
 import pandas as pd
 import sys
-
-class InvalidFileType(Exception):
-    pass
-
-class InvalidFileFormat(Exception):
-    pass
+from typing import List
 
 
-# if len(sys.argv) == 3:
 
-    try:
-        inFile = input("Enter input file path (.csv/xls): ") 
-        # outFile = input("Enter output file path (.csv): ") 
-
-        inFile = inFile.replace('"', "")
-
-        outFile = inFile[:-4]
-        outFile += ".out.xls"
+inFile = input("Enter input file path (.csv/xls): ") 
+inFile = inFile.replace('"', "")
+outFile = inFile[:-4]
 
 
-        df = ''
 
-        # read file, drop unnamed columns 
-        if inFile.lower().endswith('.csv'):
-            df = pd.read_csv(inFile).dropna(axis=1, how='all')
+df = ''
 
-        elif inFile.lower().endswith('.xls'):
-            df = pd.read_excel(inFile).dropna(axis=1, how='all')
-
-        else:
-            raise InvalidFileType
-
-        
-        if 'Description 1' in df.columns and 'Description 2' in df.columns and 'Description 3' in df.columns and 'Description 4' in df.columns and 'Tariff Code' in df.columns:
-            # # combine descrip1 and decrip2 into col 'Product Name'
-            # df['Product Name'] = df['Description 1'].str.cat(df['Description 2'],sep=", ")
+# read file, drop unnamed columns 
+if inFile.lower().endswith('.csv'):
+    df = pd.read_csv(inFile).dropna(axis=1, how='all')
 
 
-            # combine descrip1 and decrip2 into col 'Product Name'
-            df['Product Description'] = df['Description 1'].str.cat(df['Description 2'],sep=" ").str.cat(df['Description 3'],sep=" ").str.cat(df['Description 4'],sep=" ").str.cat(df['Tariff Code'],sep=" ")
+elif inFile.lower().endswith('.xls'):
+    df = pd.read_excel(inFile).dropna(axis=1, how='all')
 
 
-            # combine descrip3 and decrip4 into col 'Product Description'
-            # df['Product Description'] = df['Description 3'].str.cat(df['Description 4'],sep=", ")
 
-            # remove columns tariff code, descrip 1,2,3,4
-            df = df.drop(['Tariff Code', 'Description 1', 'Description 2', 'Description 3', 'Description 4'], axis=1)
-            
+matchesList = ['Description 1', 'Description 2', 'Description 3', 'Description 4', 'Tariff Code', 'Part Number'] 
+dfColumnList = df.columns.tolist()
 
 
-            # df.to_csv(outFile, index=False)
+check =  all(item in dfColumnList for item in matchesList)
 
-            df.to_excel(outFile, index=False)  
+if check is True:
+    # replace null characters with empty space
+    df.fillna('', inplace=True)
 
-            
+    # rename columns Part Number and Description 1
+    df.rename({"Part Number" : "SKU"}, axis=1, inplace=True)
 
-        else:
-            raise InvalidFileFormat
-        
-            
+    # merge columns Description 2,3,4 and Tariff Code into Description column
+    df['Description'] = df[['Description 1','Description 2', 'Description 3', 'Description 4', 'Tariff Code']].agg(' '.join, axis=1)
+
+
+    # removes columns Description 1,2,3,4 and Tariff Code
+    df.drop(['Description 1', 'Description 2', 'Description 3', 'Description 4', 'Tariff Code'], axis=1, inplace=True)
+
+    # create item name column, duplicate of SKU
+    df['Item Name'] =  df['SKU']
+
+
+
+
+    numRows = len(df)
+
+    # appends addiitonal columns
+    s = pd.Series(['1'])
+    s = s.repeat(numRows)
+    df['PriceList 1'] = s.values
+
+    s = pd.Series(['2'])
+    s = s.repeat(numRows)
+    df['PriceList 2'] = s.values
+
+    s = pd.Series(['3'])
+    s = s.repeat(numRows)
+    df['PriceList 3'] = s.values
+
+    s = pd.Series(['4'])
+    s = s.repeat(numRows)
+    df['PriceList 4'] = s.values
+
+    s = pd.Series(['per_item'])
+    s = s.repeat(numRows)
+    df['Type'] = s.values
+
+    s = pd.Series(['GBP'])
+    s = s.repeat(numRows)
+    df['Currency Code'] = s.values
+
+    s = pd.Series(['no_rounding'])
+    s = s.repeat(numRows)
+    df['Rounding Type'] = s.values
+
+    df = df[['SKU', 'Product Group', 'Item Name', 'Description', 'Price 1', 'Price 2', 'Price 3', 'Price 4','PriceList 1', 'PriceList 2', 'PriceList 3', 'PriceList 4','Type', 'Currency Code', 'Rounding Type']]
+
+
+
+    # df.to_csv(outFile + ".out.csv", index=False)
+
+    df.to_excel(outFile + ".out.xls", index=False)  
+
+
+
+else:
+    print("Error not all columns found!")
+
+
+
+
+
+#     df.fillna('', inplace=True)
+
+#     df['SKU']
+
+
+#     df['Product Description'] = df['Description 1'].astype(str) + " " + df['Description 2'].astype(str) + " " + df['Description 3'].astype(str) + " " +  df['Description 4'].astype(str) + " " +  df['Tariff Code'].astype(str)
+
+
+#     # remove columns tariff code, descrip 1,2,3,4
+#     df = df.drop(['Tariff Code', 'Description 1', 'Description 2', 'Description 3', 'Description 4'], axis=1)
     
-    except FileNotFoundError:
-        print("Unable to find input file provided")
-
-    except InvalidFileType:
-        print("Invalid file type provided, please provide a .csv or .xls file")
-
-    except InvalidFileFormat:
-        print("Invalid file structure, Unable to find columns, Description 1/2/3/4")
-
-
-    except UnicodeDecodeError:
-        print("Invalid input file provided, please provide a csv file")
-
-
-# else:
-#     print("Please provide two arguments, the input file and the output file\n")
-#     print("e.g. merge_descriptions.exe in.csv out.csv ")
 
 
 
 
+#     df.to_excel(outFile, index=False)  
 
+            
 
+ 
 
 
