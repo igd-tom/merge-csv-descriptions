@@ -3,6 +3,14 @@ import sys
 from typing import List
 
 
+def trim_all_columns(df):
+    """
+    Trim whitespace from ends of each value across all series in dataframe
+    """
+    trim_strings = lambda x: x.strip() if isinstance(x, str) else x
+    return df.applymap(trim_strings)
+
+
 
 inFile = input("Enter input file path (.csv/xls): ") 
 inFile = inFile.replace('"', "")
@@ -37,6 +45,13 @@ if check is True:
 
     # merge columns Description 2,3,4 and Tariff Code into Description column
     df['Description'] = df[['Description 1','Description 2', 'Description 3', 'Description 4', 'Tariff Code']].agg(' '.join, axis=1)
+
+    # df['Description'] = df['Description'].str.rstrip()
+    # df['Description'] = df['Description'].str.strip()
+
+    df = trim_all_columns(df)
+
+   
 
 
     # removes columns Description 1,2,3,4 and Tariff Code
